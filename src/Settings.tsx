@@ -1,0 +1,7 @@
+import {AccountSecurity} from './AccountSecurity';
+import {api,type Row} from './api';
+import {Form} from './ui';
+import type {Shared} from './Records';
+import {managers} from './modules';
+
+export function Settings({user,options,refresh,notify,society}:Shared&{society:Row}){return <><div className="page-title"><div><p className="eyebrow">ADMINISTRATION</p><h1>Society & account</h1><p>Your community profile and personal account security.</p></div></div><div className="settings-grid society-profile-grid"><section className="panel settings-panel"><h2>Society profile</h2><p className="muted">Used across society records and gate access schedules.</p>{managers.includes(user.role)?<Form key={JSON.stringify(society)} fields={[{key:'name',label:'Society name',required:true},{key:'address',label:'Address',type:'textarea'},{key:'registration_number',label:'Registration number'},{key:'emergency_phone',label:'Society emergency phone',type:'tel'},{key:'timezone',label:'Timezone (IANA name)',required:true,help:'For example: Asia/Kolkata. Gate shifts use this timezone.'}]} initial={society} options={options} onClose={()=>{window.location.hash='overview';}} onSave={async data=>{await api('/society','PUT',data);refresh();notify('Society profile updated');}}/>:<dl className="details-grid">{['name','address','registration_number','emergency_phone','timezone'].map(k=><div key={k}><dt>{k.replaceAll('_',' ')}</dt><dd>{society[k]||'—'}</dd></div>)}</dl>}</section></div><AccountSecurity/></>;}
