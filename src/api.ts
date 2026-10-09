@@ -6,7 +6,22 @@ export async function api<T=any>(path:string,method='GET',body?:unknown):Promise
   const headers:Record<string,string>={};
   if(method!=='GET')headers['X-CSRF-Token']=csrf;
   if(body && !(body instanceof FormData))headers['Content-Type']='application/json';
-  const response=await fetch('/api'+path,{method,credentials:'same-origin',headers,body:body instanceof FormData?body:body===undefined?undefined:JSON.stringify(body)});
+  
+const requestHeaders = new Headers(headers);
+
+requestHeaders.set('ngrok-skip-browser-warning', '1');
+
+const response = await fetch('/api' + path, {
+  method,
+  credentials: 'same-origin',
+  headers: requestHeaders,
+  body: body instanceof FormData
+    ? body
+    : body === undefined
+      ? undefined
+      : JSON.stringify(body),
+});
+
   const data=await response.json().catch(()=>({detail:'Server returned an unexpected response'}));
   if(response.status===401&&!path.startsWith('/auth/'))window.dispatchEvent(new Event('society-session-expired'));
   if(!response.ok)throw new Error(typeof data.detail==='string'?data.detail:'Request failed. Check the form and retry.');
